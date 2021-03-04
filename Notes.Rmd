@@ -61,8 +61,23 @@ In order to use these data in Circuitscape (or Omniscape), we need to convert th
 prot.areas$ID <- seq(1, nrow(prot.areas))
 node.cent$ID <- seq(1, nrow(prot.areas)) 
 node.cent <- node.cent %>% st_buffer(., 10000)
+
+
 patch.based.node <- fasterize::fasterize(prot.areas, hm, field = "ID")
 
 cent.based.node <- fasterize::fasterize(node.cent, hm, field = "ID")
 
+resist.1 <- (hm + 1)^10 + (slope/4)
+
+resist.2 <- (hm + 1)^4 + (slope/2)
+
+
+resist.3 <- resist.1
+resist.3[] <- cellStats(resist.1, min)
+
+writeRaster(cent.based.node, "Data/centroidnode.tif")
+
+writeRaster(resist.1, "Data/resist1.tif")
+writeRaster(resist.2, "Data/resist2.tif")
+writeRaster(resist.3, "Data/resist3.tif")
 ```
