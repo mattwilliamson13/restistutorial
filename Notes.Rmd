@@ -1,0 +1,61 @@
+---
+title: "Getting started with connectivity modeling"
+author: "Matt Williamson"
+date: "3/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(raster)
+library(sp)
+library(sf)
+library(rgeos)
+library(rgdal)
+library(tidyverse)
+```
+
+# What are we connecting?
+
+Any connectivity modeling exercise begins with deciding what (or where) we are hoping to connect. This can be (and often is) protected areas, suitable (or "good") habitat, known home ranges, etc. In the context of circuit theory, we might call these the 'nodes' or the 'vertices' of the graph. They comprise the portion of the network we are interested in connecting. In order to make this exercise computationally efficient, we'll use GAP1 status protected areas in Wyoming (US) that are larger than 50000 ac (~20000 ha). We'll load those here:
+
+```{r loadpas}
+prot.areas <- st_read("Data/wy_gap1.shp")
+plot(st_geometry(prot.areas))
+```
+
+There are several additional considerations for how we want to represent these in the network:
+1. We can use the entirety of the "patch"
+2. We can use the centroid of the "patch"
+3. We can choose random points within the "patches"
+
+We'll do that here:
+```{r nodeassign}
+node.cent <- st_centroid(prot.areas)
+node.sample <- st_sample(prot.areas, size= rep(1, nrow(prot.areas)))
+```
+
+# What are the impediments? 
+Resistance surfaces depict the degree of difficulty (and/or likelihood of mortality) an animal experiences moving across the landscape. This difficulty might simply be a function of Euclidean distance or may be a complex set of interactions between a variety of biophysical and social factors. For simplicity's sake, we are only going to consider two elements here: slope and human modification.
+```{r ldrstr}
+hm <- raster('Data/human_mod.tif')
+plot(hm)
+elev <- raster('Data/elevation_agg.tif')
+slope <- terrain(elev, opt='slope', unit = 'degrees')
+
+```
+
+## A brief note about functional form
+``` {r funcform}
+sim.res <- rnorm(1000)
+lin.res <- sim.res
+exp.up <- exp(sim.res)
+exp.dn <- exp(-sim.res)
+
+```
+
+In order to use these data in Circuitscape (or Omniscape), we need to convert these points into categorical rasters.
+
+```{r catrast}
+#patch.based.node <- fasterize::fasterize(prot.areas, field = "OBJECTID")
+```
