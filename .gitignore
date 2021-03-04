@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+restistutorial.Rproj
+*.grd
+*.gri
+*.vrt
