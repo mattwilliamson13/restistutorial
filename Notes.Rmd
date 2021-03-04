@@ -46,6 +46,7 @@ slope <- terrain(elev, opt='slope', unit = 'degrees')
 ```
 
 ## A brief note about functional form
+
 ``` {r funcform}
 sim.res <- rnorm(1000)
 lin.res <- sim.res
@@ -57,5 +58,11 @@ exp.dn <- exp(-sim.res)
 In order to use these data in Circuitscape (or Omniscape), we need to convert these points into categorical rasters.
 
 ```{r catrast}
-#patch.based.node <- fasterize::fasterize(prot.areas, field = "OBJECTID")
+prot.areas$ID <- seq(1, nrow(prot.areas))
+node.cent$ID <- seq(1, nrow(prot.areas)) 
+node.cent <- node.cent %>% st_buffer(., 10000)
+patch.based.node <- fasterize::fasterize(prot.areas, hm, field = "ID")
+
+cent.based.node <- fasterize::fasterize(node.cent, hm, field = "ID")
+
 ```
